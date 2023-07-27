@@ -5,7 +5,6 @@ from typing import Optional
 
 class UserRead(schemas.BaseUser[int]):
 
-
     id: int
     name: str
     is_active: bool = True
