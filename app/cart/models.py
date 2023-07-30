@@ -11,7 +11,8 @@ cart = Table(
     metadata,
     Column('id',Integer, primary_key=True, index=True),
     Column('is_ordered', Boolean, default=False,nullable =False),
-    Column('user_id', Integer, ForeignKey(User.id),nullable =False)
+    Column('user_id', Integer, ForeignKey(User.id),nullable =False),
+    Column('is_done',Boolean, default=False, nullable=False),
 )
 
 cart_item = Table(

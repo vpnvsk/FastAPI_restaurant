@@ -13,5 +13,3 @@ class ListItemModel(BaseModel):
     name: str
     price: float
 
-# class CategoryItemsModel(BaseModel):
-#     __root__: Dict[str, List[ListItemModel]]

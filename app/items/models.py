@@ -3,21 +3,7 @@ from database import Base
 
 metadata = MetaData()
 
-# class Category(Base):
-#     __tablename__ = 'category'
-    
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String)
-    
 
-# class Item(Base):
-#     __tablename__ = 'item'
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String, unique=True, nullable=False)
-#     ingridients = Column(String)
-#     category_id = Column(Integer, ForeignKey('category.id'))
-#     price = Column(Integer)
 
 
 
