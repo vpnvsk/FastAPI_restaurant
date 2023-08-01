@@ -76,7 +76,6 @@ async def get_last_messages(
     ).where(cart.c.is_done == False)
     result = await session.execute(query)
     messages = [dict(r._mapping) for r in result]
-    print(messages)
     return messages
 
 @router.websocket("/ws/{client_id}")

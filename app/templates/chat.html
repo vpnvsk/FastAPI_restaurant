@@ -75,14 +75,32 @@ function sendMessage(event) {
         return response.json()
     }
 
-    getLastMessages()
-        .then(messages => {
-            appendMessage("last 5 :")
-            messages.forEach(msg => {
-                appendMessage(msg.message)
-            })
-            appendMessage("\n new :")
-        })
+    // getLastMessages()
+    //     .then(messages => {
+    //         appendMessage("last 5 :")
+    //         messages.forEach(msg => {
+    //             appendMessage(msg.message)
+    //         })
+    //         appendMessage("\n new :")
+    //     })
+
+        async function getAndAppendLastMessages() {
+    try {
+        const messages = await getLastMessages();
+        appendMessage("Last 5:");
+        messages.forEach(msg => {
+            const text = `${msg.name} - Quantity: ${msg.quantity}`;
+            appendMessage(text);
+        });
+        appendMessage("\n New:");
+    } catch (error) {
+        console.error("Error fetching last messages:", error);
+    }
+}
+
+    getAndAppendLastMessages();
+
+
     function appendMessage(msg) {
         let messages = document.getElementById('messages')
         let message = document.createElement('li')
@@ -90,12 +108,34 @@ function sendMessage(event) {
         message.appendChild(content)
         messages.appendChild(message)
     }
+
+
+    function parseAndDisplayMessage(message) {
+  const messages = JSON.parse(message);
+
+  const formattedMessages = messages.map(msg => {
+    return `${msg.name} - Quantity: ${msg.quantity}`;
+  });
+
+  return formattedMessages.join("\n");
+}
+function parseAndDisplayMessage(message) {
+  const messages = JSON.parse(message);
+
+  const formattedMessages = messages.map(msg => {
+    return `${msg.name} - Quantity: ${msg.quantity}`;
+  });
+
+  return formattedMessages.join("\n");
+}
+
     let client_id = Date.now()
     const socket = new WebSocket(`ws://localhost:8000/chat/ws/${client_id}`);
     // let ws = new WebSocket(`ws://localhost:8000/chat/ws/${client_id}`);
     socket.onmessage = (event) => {
         console.log("Received message:", event.data);
-        appendMessage(event.data);
+        msg = parseAndDisplayMessage(event.data)
+        appendMessage(msg);
     };
 socket.onopen = () => {
   console.log("WebSocket connection established.");

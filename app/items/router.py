@@ -78,26 +78,31 @@ async def add_to_cart(operation: AddToCart ,item_id: int,background_tasks: Backg
     else:
         cart_id = cart_obj[0] 
     stmt = insert(cart_item).values(quantity=quantity,cart_id=cart_id,item_id=item_id)
-    await session.execute(stmt)
+    res = await session.execute(stmt)
     await session.commit()
-
-
+    # cart_item_id = res.inserted_primary_key[0]
+    # query = select(item.c.name).select_from(join(item, cart_item, item.c.id == cart_item.c.item_id)).where(cart_item.c.id==cart_item_id)
+    # c_res = await session.execute(query)
+    # print(c_res)
+    query = select(item.c.name).where(item.c.id == item_id)
+    c_res = await session.execute(query)
+    item_name = c_res.scalar()
 
 
     # query = select(item.c.name, cart_item.c.quantity).select_from(
     #     join(item, cart_item, item.c.id == cart_item.c.item_id).join(cart, cart_item.c.cart_id == cart.c.id)
     # ).where(cart.c.is_done == False)
     # result = await session.execute(query)[dict(r._mapping) for r in result]
-    cart_items = 'test items'
 
     # Convert the cart items to JSON
 
 
     # Notify connected clients in the background (without waiting for their response)
-    cart_items = [{"name": "Test Item", "quantity": 1}]  # Replace with actual item details
+    cart_items = [{"name": item_name, "quantity": quantity}]  # Replace with actual item details
+    cart_items_json = json.dumps(cart_items)
 
     # Enqueue the message instead of broadcasting directly
-    await manager.broadcast(json.dumps(cart_items))
+    await manager.broadcast(cart_items_json)
     return {"status":"added to cart"}
 
 
