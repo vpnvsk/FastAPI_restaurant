@@ -8,13 +8,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from redis import asyncio as aioredis
 
-from auth.base_config import auth_backend, fastapi_users
-from auth.schemas import UserRead, UserCreate
-from items.router import router as router_menu
-from cart.router import router as router_cart
-from pages.router import router as router_pages
-from chat.router import router as router_chat
-from chat.router import ConnectionManager
+from app.auth.base_config import auth_backend, fastapi_users
+from app.auth.schemas import UserRead, UserCreate
+from app.items.router import router as router_menu
+from app.cart.router import router as router_cart
+from app.pages.router import router as router_pages
+from app.chat.router import router as router_chat
+from app.chat.router import ConnectionManager
+from app.payment.router import router as router_payment
+
+
 manager = ConnectionManager()
 
 app = FastAPI()
@@ -40,6 +43,7 @@ app.include_router(router_menu)
 app.include_router(router_cart)
 app.include_router(router_chat)
 app.include_router(router_pages)
+app.include_router(router_payment)
 
 origins = [
     "http://localhost:8000",

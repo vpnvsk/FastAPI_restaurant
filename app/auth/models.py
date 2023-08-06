@@ -1,6 +1,6 @@
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, MetaData
-from database import Base
+from app.database import Base
 
 
 class Role(Base):

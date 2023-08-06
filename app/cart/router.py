@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, update, join, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_async_session
-from auth.models import User
-from auth.base_config import current_user
-from items.models import item
-from cart.models import cart, cart_item
-from cart.schemas import ChangeQuantity
+from app.database import get_async_session
+from app.auth.models import User
+from app.auth.base_config import current_user
+from app.items.models import item
+from app.cart.models import cart, cart_item
+from app.cart.schemas import ChangeQuantity
 
 
 router = APIRouter(

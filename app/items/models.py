@@ -1,10 +1,5 @@
 from sqlalchemy import  Table,Column, ForeignKey, Integer, String, MetaData
-from database import Base
-
-metadata = MetaData()
-
-
-
+from app.database import Base, metadata
 
 
 category = Table(

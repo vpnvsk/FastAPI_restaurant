@@ -1,10 +1,9 @@
 from sqlalchemy import  Table, Column, ForeignKey, Integer, String, MetaData, Boolean
-from database import Base
+from app.database import Base, metadata
 
-from items.models import item
-from auth.models import User
+from app.items.models import item
+from app.auth.models import User
 
-metadata = MetaData()
 
 cart = Table(
     "cart",
