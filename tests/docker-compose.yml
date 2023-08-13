@@ -1,8 +1,0 @@
-version: '3.5'
-services:  
-  test_database:
-    image: postgres:14.3-alpine
-    env_file: 
-      - .test_database.env
-    ports:
-      - "6000:5432"

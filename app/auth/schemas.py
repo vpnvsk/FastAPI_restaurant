@@ -1,10 +1,9 @@
-from fastapi_users import schemas
-
 from typing import Optional
+
+from fastapi_users import schemas
 
 
 class UserRead(schemas.BaseUser[int]):
-
     id: int
     name: str
     is_active: bool = True
@@ -13,14 +12,14 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserCreate(schemas.BaseUserCreate):
-    
-    name:str
+    name: str
     email: str
     role_id: int
     password: str
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     is_verified: Optional[bool] = False
+
 
 class UserUpdate(schemas.BaseUserUpdate):
     pass

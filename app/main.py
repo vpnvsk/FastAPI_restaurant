@@ -1,24 +1,21 @@
 import uvicorn
-
-from fastapi import FastAPI, BackgroundTasks
-import asyncio
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from fastapi.middleware.cors import CORSMiddleware
-
 from redis import asyncio as aioredis
 
-from app.auth.base_config import auth_backend, fastapi_users
-from app.auth.schemas import UserRead, UserCreate
-from app.items.router import router as router_menu
-from app.cart.router import router as router_cart
-from app.pages.router import router as router_pages
-from app.chat.router import router as router_chat
-from app.chat.router import ConnectionManager
-from app.payment.router import router as router_payment
-
+from auth.base_config import auth_backend, fastapi_users
+from auth.schemas import UserRead, UserCreate
+from cart.router import router as router_cart
+from chat.router import ConnectionManager
+from chat.router import router as router_chat
+from items.router import router as router_menu
+from pages.router import router as router_pages
+from payment.router import router as router_payment
 
 manager = ConnectionManager()
+
 
 app = FastAPI()
 
@@ -68,5 +65,4 @@ async def startup():
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
 
-# app.add_event_handler("startup", lambda: asyncio.create_task(manager.process_message_queue()))
 

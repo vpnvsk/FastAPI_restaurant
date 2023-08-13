@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.join(sys.path[0], 'app'))
 
 from app.config import POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, DB_HOST
-from app.database import Base
+# from app.database import Base
 from app.database import metadata
 
 from app.auth.models import *
@@ -36,7 +36,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata =  [metadata,Base.metadata]
+target_metadata = metadata  # ,Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

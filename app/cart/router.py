@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, update, join, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_async_session
-from app.auth.models import User
-from app.auth.base_config import current_user
-from app.items.models import item
-from app.cart.models import cart, cart_item
-from app.cart.schemas import ChangeQuantity
-
+from auth.base_config import current_user
+from auth.models import User
+from cart.models import cart, cart_item
+from cart.schemas import ChangeQuantity
+from database import get_async_session
+from items.models import item
 
 router = APIRouter(
     prefix='/cart',
@@ -17,8 +16,7 @@ router = APIRouter(
 
 
 @router.get('/')
-async def get_cart_items(session: AsyncSession = Depends(get_async_session), user: User=Depends(current_user)):
-
+async def get_cart_items(session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
     query = (
         select(item.c.name, cart_item.c.quantity, item.c.price)
         .select_from(
@@ -38,20 +36,18 @@ async def get_cart_items(session: AsyncSession = Depends(get_async_session), use
 
     return response
 
-@router.post('/')
-async def change_quantity_of_product(option:ChangeQuantity,
-                                  session: AsyncSession = Depends(get_async_session),
-                                     user: User=Depends(current_user)):
-        
 
+@router.post('/')
+async def change_quantity_of_product(option: ChangeQuantity,
+                                     session: AsyncSession = Depends(get_async_session),
+                                     user: User = Depends(current_user)):
     query = select(cart_item.c.quantity, cart_item.c.id).select_from(
         join(item, cart_item, item.c.id == cart_item.c.item_id)
         .join(cart, cart_item.c.cart_id == cart.c.id)).where(cart.c.user_id == user.id,
-                                                            cart.c.is_ordered == False, item.c.name == option.name)
+                                                             cart.c.is_ordered == False, item.c.name == option.name)
     res = await session.execute(query)
 
     cart_item_row = res.fetchone()
-
 
     if cart_item_row:
         quantity_value, cart_item_id = cart_item_row
@@ -65,8 +61,7 @@ async def change_quantity_of_product(option:ChangeQuantity,
                 stmt = delete(cart_item).where(cart_item.c.id == cart_item_id)
                 res = await session.execute(stmt)
                 await session.commit()
-                return {"mesage":"item has been deleted"}
-
+                return {"mesage": "item has been deleted"}
 
         stmt = update(cart_item).where(cart_item.c.id == cart_item_id).values(quantity=quantity_value)
         await session.execute(stmt)

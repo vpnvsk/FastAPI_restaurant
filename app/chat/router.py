@@ -1,25 +1,20 @@
-from typing import List
-from collections import defaultdict
 import json
+from collections import defaultdict
+from typing import List
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from pydantic import BaseModel
-from sqlalchemy import insert, select, join, update
+from sqlalchemy import select, join, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cart.models import cart, cart_item
-from app.items.models import item
-from app.auth.models import User
-
-
-from app.database import async_session_maker, get_async_session
-
+from auth.models import User
+from cart.models import cart, cart_item
+from database import get_async_session
+from items.models import item
 
 router = APIRouter(
     prefix='/chat',
     tags=["Chat"]
 )
-
 
 
 class ConnectionManager:
@@ -41,6 +36,7 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_text(message)
 
+
 async def update_cart_status(user_name: str, session: AsyncSession = Depends(get_async_session)):
     stmt = update(cart).where(cart.c.user_id == User.id).values(is_done=True).where(User.name == user_name)
     await session.execute(stmt)
@@ -50,23 +46,27 @@ async def update_cart_status(user_name: str, session: AsyncSession = Depends(get
 
 manager = ConnectionManager()
 
+
 @router.get("/last_messages")
 async def get_last_messages(
         session: AsyncSession = Depends(get_async_session),
 ):
     query = select(item.c.name, cart_item.c.quantity, User.name).select_from(
-        join(item, cart_item, item.c.id == cart_item.c.item_id).join(cart, cart_item.c.cart_id == cart.c.id).join(User, cart.c.user_id==User.id)
+        join(item, cart_item, item.c.id == cart_item.c.item_id).join(cart,
+                                                                     cart_item.c.cart_id == cart.c.id).join(User,
+                                                                     cart.c.user_id == User.id)
     ).where(cart.c.is_done == False, cart.c.is_ordered == True)
     result = await session.execute(query)
     user_items = defaultdict(list)
     for row in result:
         item_data = dict(row._mapping)
-        user_name = item_data.pop("name_1")  
+        user_name = item_data.pop("name_1")
         user_items[user_name].append(item_data)
 
     output = [{user_name: user_items[user_name]} for user_name in user_items]
     print(output)
     return output
+
 
 # @router.websocket("/ws/{client_id}")
 # async def websocket_endpoint(websocket: WebSocket ):
@@ -90,7 +90,6 @@ async def get_last_messages(
 #         await manager.broadcast(f"Client left the chat")
 @router.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depends(get_async_session)):
-
     await manager.connect(websocket)
     try:
         while True:
@@ -100,7 +99,8 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
                 user_name = message.get("userName")
                 if user_name:
                     # Update the database for the corresponding user name
-                    stmt = update(cart).where(cart.c.user_id == User.id).values(is_done=True).where(User.name == user_name)
+                    stmt = update(cart).where(cart.c.user_id == User.id).values(is_done=True).where(
+                        User.name == user_name)
                     await session.execute(stmt)
                     await session.commit()
                     # Broadcast a message to all clients if needed
@@ -109,8 +109,3 @@ async def websocket_endpoint(websocket: WebSocket, session: AsyncSession = Depen
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client left the chat")
-
-
-
-
-
