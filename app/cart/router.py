@@ -37,7 +37,7 @@ async def get_cart_items(session: AsyncSession = Depends(get_async_session), use
     return response
 
 
-@router.post('/')
+@router.put('/')
 async def change_quantity_of_product(option: ChangeQuantity,
                                      session: AsyncSession = Depends(get_async_session),
                                      user: User = Depends(current_user)):

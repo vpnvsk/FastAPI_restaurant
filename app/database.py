@@ -19,7 +19,7 @@ Base = declarative_base()
 metadata = MetaData()
 metadata1 = MetaData()
 
-engine = create_async_engine(SQLALCHEMY_URL, poolclass=NullPool)
+engine = create_async_engine(SQLALCHEMY_URL, poolclass=NullPool, echo=True)
 async_session_maker = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 
