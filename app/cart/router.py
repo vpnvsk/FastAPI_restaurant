@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from auth.base_config import current_user
 from auth.models import User
 from cart.models import cart, cart_item
-from cart.schemas import ChangeQuantity
+from cart.schemas import ChangeQuantity, GetCart, CartItem
 from database import get_async_session
 from items.models import item
 
@@ -16,7 +16,8 @@ router = APIRouter(
 
 
 @router.get('/')
-async def get_cart_items(session: AsyncSession = Depends(get_async_session), user: User = Depends(current_user)):
+async def get_cart_items(session: AsyncSession = Depends(get_async_session),
+                         user: User = Depends(current_user)) -> GetCart:
     query = (
         select(item.c.name, cart_item.c.quantity, item.c.price)
         .select_from(
@@ -26,21 +27,21 @@ async def get_cart_items(session: AsyncSession = Depends(get_async_session), use
         .where(cart.c.user_id == user.id, cart.c.is_ordered == False)
     )
     result = await session.execute(query)
-
     cart_items = [dict(r._mapping) for r in result]
+    print(cart_items)
     final_value = sum(item["quantity"] * item["price"] for item in cart_items)
-    response = {
-        "cart_items": cart_items,
-        "final_value": final_value
-    }
+    get_cart_response = GetCart(
+        cart_items=[CartItem(**item) for item in cart_items],
+        final_value=final_value
+    )
 
-    return response
+    return get_cart_response
 
 
 @router.put('/')
 async def change_quantity_of_product(option: ChangeQuantity,
                                      session: AsyncSession = Depends(get_async_session),
-                                     user: User = Depends(current_user)):
+                                     user: User = Depends(current_user)) -> dict:
     query = select(cart_item.c.quantity, cart_item.c.id).select_from(
         join(item, cart_item, item.c.id == cart_item.c.item_id)
         .join(cart, cart_item.c.cart_id == cart.c.id)).where(cart.c.user_id == user.id,

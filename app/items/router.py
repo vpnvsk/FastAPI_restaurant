@@ -11,7 +11,7 @@ from cart.models import cart, cart_item
 from cart.schemas import AddToCart
 from database import get_async_session
 from items.models import category, item
-from items.schemas import ListItemModel
+from items.schemas import ListItemModel, MenuItem
 
 router = APIRouter(
     prefix='/menu',
@@ -21,7 +21,7 @@ router = APIRouter(
 
 @router.get('/', response_model=Dict[str, List[ListItemModel]])
 @cache(expire=360)
-async def get_menu(session: AsyncSession = Depends(get_async_session)):
+async def get_menu(session: AsyncSession = Depends(get_async_session)) -> List[ListItemModel]:
     query = select(category.c.name, item.c.name, item.c.price).join(category)
     result = await session.execute(query)
 
@@ -40,11 +40,15 @@ async def get_menu(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.get('/{item_id}')
-async def get_menu_item(item_id: int, session: AsyncSession = Depends(get_async_session)):
+async def get_menu_item(item_id: int, session: AsyncSession = Depends(get_async_session)) -> MenuItem:
     query = select(item.c.name, item.c.price, item.c.ingridients).where(item.c.id == item_id)
     result = await session.execute(query)
 
-    return [dict(r._mapping) for r in result]
+    # return dict(r._mapping) for r in result
+    res = {}
+    for r in result:
+        res = dict(r._mapping)
+    return res
 
 
 @router.post('/{item_id}')
@@ -76,6 +80,5 @@ async def add_to_cart(operation: AddToCart, item_id: int, session: AsyncSession 
         stmt = update(cart_item).where(cart_item.c.id == cart_item_obj[0]).values(quantity=new_quantity)
         await session.execute(stmt)
     await session.commit()
-
 
     return {"status": "added to cart"}
